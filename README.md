@@ -204,13 +204,13 @@ Code | Function
 # Display Use
 
 ### Top line :
-Message Line
+Message Line.
 
 ### Lower Line :
 Use of Soft Key Directly below. The use of the key can change when it's lable changes.
 
 ### Ready :
-Means OK for Service
+Means OK for Service.
 
 ### ShoMore and GoBack :
 Only one message at a time can be shown. Use soft Keys to look at others.
