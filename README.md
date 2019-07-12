@@ -155,7 +155,7 @@ Reset - Automatic if throttle is returned to the idle position (Limited to 3 wit
 The file path should then look like `expression2\brightstar_control_system\...`.
 5. If you see the folder "brightstar-master" inside the "expression2" folder, __YOU INSTALLED IT WRONG__ and the E2 will not work!
 
-You will also need Magnums Train Models and Titus's Locomotive Sound Expansion Pack's Sound packs for it to work correctly. There are five:
+You will also need Magnums Train Models and Titus's Locomotive Sound Expansion Pack's Sound packs for it to work correctly. There are eight:
 
 Titus's Locomotive Sound Expansion Pack(s):
 
@@ -167,6 +167,11 @@ Titus's Locomotive Sound Expansion Pack(s):
  
 Magnum's Train Model Pack
  * https://steamcommunity.com/sharedfiles/filedetails/?id=260954002
+ 
+Grovesteetgman Train Sounds
+ * https://steamcommunity.com/sharedfiles/filedetails/?id=240020348
+ * https://steamcommunity.com/sharedfiles/filedetails/?id=1254010890
+ * https://steamcommunity.com/sharedfiles/filedetails/?id=1254014222
 
 If you're currently in-game in Garry's Mod, open the E2 Editor, and click the "Update" button under the list of E2s on the lefthand side of the window.
 
