@@ -1,5 +1,8 @@
 # BrightStar™ Engine Management & Control System
 
+### Table of Contents
+ * [BrightStar™ Control System & Associated Component Description]()
+ * [Installation]()
 
 ## BrightStar™ Control System & Associated Component Description
 The BrightStar™ Microprocessor wheelslip control system controls many of the functions of the Locomotive. It's key function is to control the amount of wheelslip and enable maximum tractive effort to be applied. With the introduction of this microprocessor based system, a 25% increase in tractive effort was achieved over the older "E & CHEC" control systems.
@@ -142,3 +145,40 @@ Reset - Automatic if throttle is returned to the idle position (Limited to 3 wit
 
 
 
+
+# Installation
+
+1. Click the "Clone or Download" button on the righthand side of the screen and select "Download Zip."
+2. Open the Zip file using a program like WinZip or WinRar, if it didn't open automatically.
+3. Navigate __INTO__ the "brightstar-master" Folder. You should see two items: a folder named "brightstar_control_system", and readme.md.
+4. Extract the two folders directly into: `<Your active steam directory>\SteamApps\common\Garry's Mod\garrysmod\data\expression2\`.
+The file path should then look like `expression2\brightstar_control_system\...`.
+5. If you see the folder "brightstar-master" inside the "expression2" folder, __YOU INSTALLED IT WRONG__ and the E2 will not work!
+
+You will also need Magnums Train Models and Titus's Locomotive Sound Expansion Pack's Sound packs for it to work correctly. There are five:
+
+Titus's Locomotive Sound Expansion Pack(s):
+
+ * https://steamcommunity.com/sharedfiles/filedetails/?id=1572612341
+ * https://steamcommunity.com/sharedfiles/filedetails/?id=1572613783
+ * https://steamcommunity.com/sharedfiles/filedetails/?id=1572616038
+ * https://steamcommunity.com/sharedfiles/filedetails/?id=1572620031
+ * *There is a fifth addon but it is not required for this to work*
+ 
+Magnum's Train Model Pack
+ * https://steamcommunity.com/sharedfiles/filedetails/?id=260954002
+
+If you're currently in-game in Garry's Mod, open the E2 Editor, and click the "Update" button under the list of E2s on the lefthand side of the window.
+
+
+## Thank You!
+Thank you for installing Titus's GE BrightStar™ Engine Management & Control System E2. 
+Find my other work around the internet:
+ * [Website](https://titusstudiosmediagroup.github.io/) https://titusstudiosmediagroup.github.io/
+ * [Twitter](https://twitter.com/TitusStudiosMG) https://twitter.com/TitusStudiosMG
+ * [Twitch](https://www.twitch.tv/titusstudios) https://www.twitch.tv/titusstudios
+ 
+ _Disclaimer: This E2 is no way, shape or form is trying to "steal" the copyrighted works of General Electric or any other business, This E2 and its code is copyrighted under Titus Studios Media, Contact for more information._
+_**Extra Note:** The information relating to the **BrightStar™ Engine Management & Control System** is genuine and accurate, and can be applied to real life systems, I do **NOT** take any responsibility for anything users do with this information._
+
+Copyright © 2019 Titus Studios Media. All rights reserved. Contact Titus Studios Media, for more information or licencing.
