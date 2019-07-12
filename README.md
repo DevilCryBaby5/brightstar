@@ -179,9 +179,9 @@ If you're currently in-game in Garry's Mod, open the E2 Editor, and click the "U
 ## Thank You!
 Thank you for installing Titus's GE BrightStar™ Engine Management & Control System E2. 
 Find my other work around the internet:
- * [Website](https://titusstudiosmediagroup.github.io/) https://titusstudiosmediagroup.github.io/
- * [Twitter](https://twitter.com/TitusStudiosMG) https://twitter.com/TitusStudiosMG
- * [Twitch](https://www.twitch.tv/titusstudios) https://www.twitch.tv/titusstudios
+ * [Website](https://titusstudiosmediagroup.github.io/) * https://titusstudiosmediagroup.github.io/
+ * [Twitter](https://twitter.com/TitusStudiosMG) * https://twitter.com/TitusStudiosMG
+ * [Twitch](https://www.twitch.tv/titusstudios) * https://www.twitch.tv/titusstudios
  
  _Disclaimer: This E2 is no way, shape or form is trying to "steal" the copyrighted works of General Electric or any other business, This E2 and its code is copyrighted under Titus Studios Media, Contact for more information._
 _**Extra Note:** The information relating to the **BrightStar™ Engine Management & Control System** is genuine and accurate, and can be applied to real life systems, I do **NOT** take any responsibility for anything users do with this information._
