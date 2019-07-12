@@ -1,8 +1,8 @@
 # BrightStar™ Engine Management & Control System
 
 ### Table of Contents
- * [BrightStar™ Control System & Associated Component Description]()
- * [Installation]()
+ * [BrightStar™ Control System & Associated Component Description](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#brightstar-control-system--associated-component-description)
+ * [Installation](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#installation)
 
 ## BrightStar™ Control System & Associated Component Description
 The BrightStar™ Microprocessor wheelslip control system controls many of the functions of the Locomotive. It's key function is to control the amount of wheelslip and enable maximum tractive effort to be applied. With the introduction of this microprocessor based system, a 25% increase in tractive effort was achieved over the older "E & CHEC" control systems.
