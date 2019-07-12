@@ -54,32 +54,32 @@ The BrightStar™ Control System has preset limits built into the control softwa
 
 # Start Up Procedures
 
-Once the BKS & Computer (BC) circuit breaker is closed the BrightStar™ will power up. The full boot up time is around 90 sec's during which time it carries out software integrity self-test. If it detecs an issue it will log the fault and a "Reset" will be displayed on the screen above the F4 key. This should be reset before starting the engine.
+Once the BKS & Computer (BC) circuit breaker is closed the BrightStar™ will power up. The full boot up time is around 90 sec's during which time it carries out software integrity self-test. If it detects an issue it will log the fault and a "Reset" will be displayed on the screen above the F4 key. This should be reset before starting the engine.
 
-1. Oberve the DID panel, wait until it displays "Engine Not Running"
+1. Observe the DID panel, wait until it displays "Engine Not Running"
 2. Ensure the EC switch is in the "Start" position.
 3. Check the forward / reverse selector (Reverser) handle is in the "neutral" position.
 4. Check the throttle handle is in the "Idle" position.
 
 
-You may now procead with normal engine starting procedures.
+You may now proceed with normal engine starting procedures.
 
 
 **NOTE:** It is preferable to use the remote start button on the engine so the fuel layshaft can be opened at the same time. This enables faster starting of the engine and is not such a drain on the locomotive starting batteries.
 
-Once the engine is started release the start button, BrightStar™ will automaticlly drop the cranking contactors out if the engine is running or if the cranking time exceeds 30 seconds and the engine has not been started.
+Once the engine is started release the start button, BrightStar™ will automatically drop the cranking contactors out if the engine is running or if the cranking time exceeds 30 seconds and the engine has not been started.
 
 1. Check the DID panel and ensure that the auxiliary generator is running and that the batteries are now charging.
 2. When ready to move the locomotive, turn the EC switch to the "Run" position.
 
 
+## Engine Running
 
 Display panel top line shows "I =" shows the battery is charging, will normally show under "I = 10A". After engine has been running for some time.
 
 V = 74V Auxiliary Generator Voltage.
 Tw = Water Temperature
 To = Engine Oil Temperature
-
 
 Reset any stored fault messages.
 This is indicated by "Reset?"
@@ -89,4 +89,56 @@ Pree button again to Reset. It may be necessary to enter level 2 to reset some f
 
 The DID should now show that there are no newer or older faults
 The locomotive is now ready for operation.
+
+
+## Faults
+
+Any fault that is displayed on the DID panel is also stored in the "Fault Log", the operator may view all the logged faults by placing the DID into level 2 and entering the "History" (Soft Key F4). When the "History" you may scroll back through all faults logged. It will always display the newest / active faults logged first.
+
+### Level of Faults 
+
+The faults that the BrightStar™ will detect have a programmed "Priority" list, depending on the fault logged will determine the following:
+
+1. Reset of the fault - Automatic or Manual
+2. Level of Access for the reset - Three levels of access
+3. Restrictions Imposed
+
+If a manual reset is being carried out, and the level of the reset is greater than the DID panel is in the message "Unable to Reset Fault at this Level" will be displayed on the DID.
+
+### Automatic Resets
+
+The BrightStar™ will automatically reset some faults for the operator; generally these automatic resets are limited to 3 resets within 60 minutes. This fault would then become a manual reset. The fault will only auto reset if the condition disappears.
+
+### Manual Resets
+
+Manual resets are carried out through the DID except for "Low Oil & Low Water Pressure" shutdowns.
+Both the LOP & LWP governor shut downs are reset by manually resetting the button on the governor. Once the governor button are reset the BrightStar™ will then automatically reset the DID and the engine can be restarted.
+
+**NOTE:** If the seriousness of the fault is detected is to- great the system will not allow the operator to reset the fault. The locomotive must be returned to the nearest maintenance depot for investigation.
+
+## Alarm Bell
+
+The alarm bell will not always ring when the system detects a fault, some faults will be displayed and logged without the operators knowledge.
+
+In the event of a fault that does activate the alarm bell it may be "Silenced" by pressed the soft key (F3).
+
+The alarm bell can so be silenced by moving the EC switch back to the "Start" position.
+
+## Resetting Serious Faults
+
+### Low Oil & Low Water Pressure
+
+Logging of these conditions take 30 - 40 seconds for the DID panel to display the fault. During this time the diesel engine will shut down.
+
+Before carrying out the resetm, investigate the possible cause of the failure. Both faults need to be reset at the engine governor, the system will reset automatically once the governor button/s are reset.
+
+### Ground Relay
+
+Message Displayed - **"E045 Won't Load: Power Circuit Ground"**
+Alarm Bell - Will ring for 30 seconds
+Reset - Automatic if throttle is returned to the idle position (Limited to 3 within 60 minutes)
+
+**NOTE:** The system does not know where in the electrical circuit the ground fault has occurred. Traction Motor cutout is fitted to the locomotive so individual traction motors can be cut out if the ground fault persists.
+
+
 
