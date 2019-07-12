@@ -2,6 +2,8 @@
 
 ### Table of Contents
  * [BrightStar™ Control System & Associated Component Description](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#brightstar-control-system--associated-component-description)
+ * [Common Monitor Parameters](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#common-monitor-parameters)
+ * [Display Use](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#display-use)
  * [Installation](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#installation)
 
 ## BrightStar™ Control System & Associated Component Description
@@ -143,6 +145,87 @@ Reset - Automatic if throttle is returned to the idle position (Limited to 3 wit
 
 **NOTE:** The system does not know where in the electrical circuit the ground fault has occurred. Traction Motor cutout is fitted to the locomotive so individual traction motors can be cut out if the ground fault persists.
 
+
+
+# Common Monitor Parameters
+
+Input codes for the Display: (Cheat Sheet)
+
+Code | Function
+-|-
+6001 | Mode Command
+6002 | Trainline Throttle Pos
+6003 | Eng Notch Command
+6004 | Diesel Eng Speed
+6005 | PWR Notch Command
+6006 | Gorss Horsepower
+6008 | Input for Traction
+6010 | Auxiliary Load
+6011 | Main Gen Voltage
+6013 | Main Gen Current
+6015 | Main Gen Field Current
+6021 | EXC Field Percent On
+6022 | EXC Field Current
+6051 | Battery Charger Current
+6053 | Aux Gen Output PO Volt
+6056 | Aux Gen Field Current
+6061 | BRK CONT (XB) Percent 
+6063 | DYN BRK TM Field Current
+6066 | DYN BRK Arm Current
+6070 | Load Control POT
+6071 | Horsepower Deration
+6072 | EGR Deration
+6073 | Hot TM Deration
+6075 | Hot Oil Deration
+6076 | Hot Water Deration
+6077 | Dirty Air FLTR Deration
+6078 | Turbo Deration
+6079 | Cold Engine?
+6151 | Locomotive Speed
+6314 | Load CONTR POT Volts
+6315 | Load CONTR (TL24) Volts 
+6317 | PC Trainline Volts
+6319 | Local PO Volts 
+6325 | Main RESV Pressure
+6327 | Manifold Air Pressure
+6329 | Barometric Pressure
+6333 | Crankshaft Pressure
+6337 | Outside Air Temp
+6339 | Eng Water Temp
+6343 | Eng Oil Temp
+6501 | Restrictions
+6502 | Traction MTR Cutout
+6550 | Mode Bytes
+7131 | D7uP Software Version
+
+---
+
+
+# Display Use
+
+### Top line :
+Message Line
+
+### Lower Line :
+Use of Soft Key Directly below. The use of the key can change when it's lable changes.
+
+### Ready :
+Means OK for Service
+
+### ShoMore and GoBack :
+Only one message at a time can be shown. Use soft Keys to look at others.
+
+### Silence :
+Use this Soft Key to shut off a Local Alarm.
+
+### Reset?? :
+Use this Soft Key to set up for Fault Reset.
+
+### Reset :
+Use this Soft Key to actually Reset Faults.
+
+### Bright/Dim :
+Press and hold to Dim and Brighten, Press and Release Shift then use Bright/Dim.
 
 
 
