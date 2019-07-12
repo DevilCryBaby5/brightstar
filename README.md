@@ -10,44 +10,83 @@ Secondary to this function is the engine / dynamic brake protection management t
 
 
 
-## Engine Lube Oil & Water Temperatures (LOT & EWT):
+### Engine Lube Oil & Water Temperatures (LOT & EWT):
 Temperatures are monitored by sensors placed in the main water and oil outlet pipes. Radiator shutters and fan speeds are controlled by the processor at predetermined temperature ranges. If BrightStar™ detects that oil or water temps are getting to high (110 deg C) it will start to decrease the horsepower output of the engine in an attempt to cool the engine down. It will progressively de-rate the horsepower to a point (114 deg C) where the Locomotive will not produce any HP. It will still allow engine RPM to help with cooling of the water and oil.
 
 
-## Diesel Engine Speed (DSS):
+### Diesel Engine Speed (DSS):
 A sensor is placed in the cam gear cover housing, and the system monitors the speed of the engine. It has a predetermined engine speeds loaded for each throttle notch position.
 
 
-## Engine Crankcase Pressure (COP):
+### Engine Crankcase Pressure (COP):
 A pressure transducer is placed in the COP / MAP box and is fed via a flexible hose connected to the cam gear cover housing above the DSS. This transducer detects if there is a "Positive" pressure developing in the engine crankcase.
 
 
-## Manifold Air Pressure (MAP):
+### Manifold Air Pressure (MAP):
 A pressure transducer is placed in the COP / MAP box and is fed via a flexible hose connected to the engine air inlet manifold. This transducer reads the turbocharger output pressure (If equipped)
 
 
-## Dynamic Brake Fan Speed (BSS):
+### Dynamic Brake Fan Speed (BSS):
 A sensor is placed in the DB fan and the system monitors the speed of the fan. Again there are predetermined fan speeds loaded, and the system will take action if an incorrect speed is detected.
 
 
-## Main Reservoir Air Pressure (MR1):
+### Main Reservoir Air Pressure (MR1):
 A pressure transducer is placed in the main reservoir line, the system controls the cut-in and cut-out of the air compressor at predetermined pressures.
 
 
-## Barometric Pressure (BPT):
+### Barometric Pressure (BPT):
 A pressure transducer is placed in the CDC; this is only used to display barometric pressure as we never run at a high enough altitudes in New Zealand to require high altitude deration.
 
 
-## Ambient Air Temperature (AT):
+### Ambient Air Temperature (AT):
 A temperature sensor is located in the CDC; it monitors the ambient air temperature.
 
 
-## Driver / Locomotive Interface (DID):
+### Driver / Locomotive Interface (DID):
 The Diagnostic Information Display is the interface between the locomotive engineer and the locomotive control system. The DID will display locomotive faults if an abnormal operating condition is detected, the computer will initiate the ALARM mode.
 In the ALARM mode, the computer uses the DID panel to alert the operator to the fault by displaying a description of the fault and in some cases, ringing an alarm bell. Depending on the severity of the defect, the control system will take action. The action can vary from an error message displayed on the DID panel, restrictions being imposed on the locomotive to the engine shutting down and not being able to be restarted.
 
 Some faults will have an automatic reset function, others will be a manual reset carried out by the operator through the DID.
 
 
-## Traction Motor Thermal Protection:
+### Traction Motor Thermal Protection:
 The BrightStar™ Control System has preset limits built into the control software and will limit the main alternator output if it reaches the prescribed limits. This function is employed to look after the traction motors and stop them from overheated, causing serious damage.
+
+# Start Up Procedures
+
+Once the BKS & Computer (BC) circuit breaker is closed the BrightStar™ will power up. The full boot up time is around 90 sec's during which time it carries out software integrity self-test. If it detecs an issue it will log the fault and a "Reset" will be displayed on the screen above the F4 key. This should be reset before starting the engine.
+
+1. Oberve the DID panel, wait until it displays "Engine Not Running"
+2. Ensure the EC switch is in the "Start" position.
+3. Check the forward / reverse selector (Reverser) handle is in the "neutral" position.
+4. Check the throttle handle is in the "Idle" position.
+
+
+You may now procead with normal engine starting procedures.
+
+
+**NOTE:** It is preferable to use the remote start button on the engine so the fuel layshaft can be opened at the same time. This enables faster starting of the engine and is not such a drain on the locomotive starting batteries.
+
+Once the engine is started release the start button, BrightStar™ will automaticlly drop the cranking contactors out if the engine is running or if the cranking time exceeds 30 seconds and the engine has not been started.
+
+1. Check the DID panel and ensure that the auxiliary generator is running and that the batteries are now charging.
+2. When ready to move the locomotive, turn the EC switch to the "Run" position.
+
+
+
+Display panel top line shows "I =" shows the battery is charging, will normally show under "I = 10A". After engine has been running for some time.
+
+V = 74V Auxiliary Generator Voltage.
+Tw = Water Temperature
+To = Engine Oil Temperature
+
+
+Reset any stored fault messages.
+This is indicated by "Reset?"
+
+Press soft key underneath message (F4), to see what the message is.
+Pree button again to Reset. It may be necessary to enter level 2 to reset some faults.
+
+The DID should now show that there are no newer or older faults
+The locomotive is now ready for operation.
+
