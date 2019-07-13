@@ -1,0 +1,1249 @@
+@name brightstar_control_system/Titus's BrightStar(TM) Engine Management & Control System
+@inputs [EGP1]:wirelink [RLCPT]:entity Power EngineStop EngineStart FuelPumpReset FuelPrime ECSwitch Lock [BRIGHTSTAR_CONNECTION BRIGHTSTAR_DATA_PORT]:array
+@outputs Prime1 Start1 Shutdown1 Isolation1 KeyPassLocal:string Locked
+#EGP Text Index
+@persist [ScreenEnt]:entity [Line1 Line2]:string [Yellow MainTextColor]:vector User:entity Cursor:vector2 Use
+#Battery Charge State
+@persist BatteryCharge MinChargeAmps MaxChargeAmps BattChargeWiOff
+#E2 Init & Keypad
+@persist QuickBoot BootN Page [Version LocalVersion MasterVersion]:string F1 F2 F3 F4 F5 Key0 Key1 Key2 Key3 Key4 Key5 Key6 Key7 Key8 Key9 Shift Clear Space Dim Enter KeyPassLocal:string StartUpMode
+#Engine Starting Func
+@persist Prime_Q Start_Unlock EC_Q IdleTemp ColdTemp IdleWaterTemp ColdWaterTemp WaterTemp EngineOilTemp EngTemp_C EngWaterTemp_C 
+#RLC Stuffs
+@persist Primed On1 MU_Master EngineRPM Prime [ErrorDisp ErrorDisp2]:string AlarmBell Silenced
+#BrightStar Common Monitor Parameters
+@persist Mode_Command:string Trainline_Throttle_Pos Eng_Notch_Command Diesel_Eng_Speed Pwr_Notch_Command Gross_Horsepower Input_For_Traction Auxiliary_Load Main_Gen_Voltage Main_Gen_Current Main_Gen_Field_Current EXC_Field_Percent_On
+@persist EXC_Field_Current Battery_Charger_Current Aux_Gen_Output_PO_Volt Aux_Gen_Field_Current Brk_Cont_XB_Percent DYN_BRK_TM_Field_Current DYN_BRK_TM_Arm_Current Load_Control_POT Horsepower_Deration
+@persist EGR_Deration Hot_TM_Deration Hot_Oil_Deration Hot_Water_Deration Dirty_Air_FLTR_Deration Turbo_Deration Cold_Engine Locomotive_Speed Load_CONTR_POT_Volts Load_CONTR_TL24_Volts PC_Trainline_Volts
+@persist Local_PO_Volts Main_Resv_Pressure Manifold_Air_Pressure Barometric_Pressure Crankshaft_Pressure Outside_Air_Temp Eng_Water_Temp Eng_Oil_Temp Restrictions:string Traction_MTR_Cutout Mode_Bytes D7uP_Software_Version:string
+@trigger
+@model models/magtrainslocos/functiondisplay.mdl
+
+#[
+
+Welcome to Titus's GE BrightStar(TM) Locomotive Management System!
+
+Please View the GitHub for info on; Setup, Use, Etc.
+
+-/-/- GitHub: https://github.com/TitusStudiosMediaGroup/brightstar -\-\-
+
+For bugs or issues, put them in the "BrightStar" GitHub. This E2 does get updated over time.
+
+
+Invade my Personal Life Here!
+
+ * Website: https://titusstudiosmediagroup.github.io/
+ * Twitter: https://twitter.com/TitusStudiosMG
+ * Twitch: https://www.twitch.tv/titusstudios
+
+
+Copyright (C) 2019 Titus Studios Media. All rights reserved - Contact for more info at: https://titusstudiosmediagroup.github.io/content/pages/contact/
+
+]#
+
+if(dupefinished() | duped()){EGP1:egpClear() reset() }
+if(first()){ 
+    
+#---- E2 Init
+
+MinChargeAmps = 7
+MaxChargeAmps = 9
+EC_Q = 0 #0, Start  1, Isolate  2, Run - Doesn't matter if StartUpMode is set to "1 or 2"
+IdleTemp = 68
+ColdTemp = 15
+IdleWaterTemp = 72
+ColdWaterTemp = 17
+StartUpMode = 1 # 0 = NZR / KiwiRail Standard (do not use if you don't know what you're doing), 1 = EMD / GE Manual Start, 2 = EMD / GE Autostart
+Locked = 0
+
+#---- E2 Init END - You're done setting up!!
+
+
+LocalVersion = "1.3.2"
+
+ScreenEnt = EGP1:entity()
+EGP1:egpClear()
+ScreenEnt:setPos(entity():toWorld(vec(0,0,0)))
+ScreenEnt:setAng(entity():toWorld(ang(0,0,0)))
+entity():setSubMaterial(1,"models/proppertextures/acrylic")
+entity():setColor(vec(15,43,55))
+entity():setBodygroup(1,0)
+
+EGP1:egpBoxOutline(0,vec2(25,30),vec2(40,30))
+EGP1:egpAlpha(0,0)
+
+#---- Color Index & Misc - Don't Edit
+Yellow = vec(255,100,0)
+MainTextColor = vec(140,228,218)
+QuickBoot = 0
+Page = 0
+Silenced = 0
+AlarmBell = 0
+
+#----- Functions
+
+function number wirelink:button(Cursor:vector2,ID:number){ #button function
+    local BPos = EGP1:egpPos(ID) 
+    local BSize = EGP1:egpSize(ID)/2
+    local Pressed = inrange(Cursor,BPos-BSize,BPos+BSize)
+    return Pressed
+}
+
+runOnHTTP(1)
+httpRequest("https://raw.githubusercontent.com/TitusStudiosMediaGroup/brightstar/master/version.txt")
+timer("vc_timeout",5000)
+setName("Titus's BrightStar(TM) Engine Management & Control System")
+} # end of dupefinished
+
+if(clk("vc_timeout")){
+    runOnHTTP(0)
+    printColor(vec(0,255,0),"[Titus's GE BrightStar(TM) Locomotive Management System]", vec(255,0,0), " Version Check Error!", vec(255)," Connection with master server failed, cannot check most recent version.") 
+    O = owner()
+    O:soundPlay(0,0,"vo/engineer_negativevocalization01.mp3")
+}
+elseif(httpClk()){
+    runOnHTTP(0)
+    stoptimer("vc_timeout")
+    local MasterVersion = httpData()
+    Version = MasterVersion
+    local LV = LocalVersion:toNumber()
+    local MV = MasterVersion:toNumber()
+    
+    if(LV != MV){
+    printColor(vec(0,255,0),"[Titus's GE BrightStar(TM) Locomotive Management System]", vec(255,0,0), " Version Error!", vec(255)," Expression 2 Version differs from the Master (GitHub) Version") 
+    }
+}
+
+function void wirelink:updateButtons(){ # Defining the EGP objects (for touch buttons)
+
+#---- Function Buttons
+
+EGP1:egpRoundedBox(10,vec2(8*8,5*30),vec2(85,55))
+EGP1:egpColor(10,MainTextColor)
+
+EGP1:egpRoundedBox(11,vec2(8*20,5*30),vec2(85,55))
+EGP1:egpColor(11,MainTextColor)
+
+EGP1:egpRoundedBox(12,vec2(8*32,5*30),vec2(85,55))
+EGP1:egpColor(12,MainTextColor)
+
+EGP1:egpRoundedBox(13,vec2(8*44,5*30),vec2(85,55))
+EGP1:egpColor(13,MainTextColor)
+
+EGP1:egpRoundedBox(14,vec2(8*56,5*30),vec2(88,55))
+EGP1:egpColor(14,MainTextColor)
+
+EGP1:egpText(15,"F1",vec2(8*6,5*30))
+EGP1:egpAlign(15,0,1)
+EGP1:egpFont(15,"Lucida Console",20)
+EGP1:egpColor(15,vec(15,43,55))
+
+EGP1:egpText(16,"F2",vec2(8*18,5*30))
+EGP1:egpAlign(16,0,1)
+EGP1:egpFont(16,"Lucida Console",20)
+EGP1:egpColor(16,vec(15,43,55))
+
+EGP1:egpText(17,"F3",vec2(8*30,5*30))
+EGP1:egpAlign(17,0,1)
+EGP1:egpFont(17,"Lucida Console",20)
+EGP1:egpColor(17,vec(15,43,55))
+
+EGP1:egpText(18,"F4",vec2(8*42,5*30))
+EGP1:egpAlign(18,0,1)
+EGP1:egpFont(18,"Lucida Console",20)
+EGP1:egpColor(18,vec(15,43,55))
+
+EGP1:egpText(19,"F5",vec2(8*54,5*30))
+EGP1:egpAlign(19,0,1)
+EGP1:egpFont(19,"Lucida Console",20)
+EGP1:egpColor(19,vec(15,43,55))
+
+
+#---- Keypad Buttons
+
+EGP1:egpRoundedBoxOutline(20,vec2(8*8,5*55),vec2(85,55))
+EGP1:egpColor(20,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(21,vec2(8*20,5*55),vec2(85,55))
+EGP1:egpColor(21,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(22,vec2(8*32,5*55),vec2(85,55))
+EGP1:egpColor(22,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(23,vec2(8*44,5*55),vec2(85,55))
+EGP1:egpColor(23,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(24,vec2(8*56,5*55),vec2(88,55))
+EGP1:egpColor(24,MainTextColor)
+
+EGP1:egpText(25," 1",vec2(8*6,5*55))
+EGP1:egpAlign(25,0,1)
+EGP1:egpFont(25,"Lucida Console",20)
+EGP1:egpColor(25,vec(255))
+
+EGP1:egpText(26," 2",vec2(8*18,5*55))
+EGP1:egpAlign(26,0,1)
+EGP1:egpFont(26,"Lucida Console",20)
+EGP1:egpColor(26,vec(255))
+
+EGP1:egpText(27," 3",vec2(8*30,5*55))
+EGP1:egpAlign(27,0,1)
+EGP1:egpFont(27,"Lucida Console",20)
+EGP1:egpColor(27,vec(255))
+
+EGP1:egpText(28," 4",vec2(8*42,5*55))
+EGP1:egpAlign(28,0,1)
+EGP1:egpFont(28,"Lucida Console",20)
+EGP1:egpColor(28,vec(255))
+
+EGP1:egpText(29," 5",vec2(8*54,5*55))
+EGP1:egpAlign(29,0,1)
+EGP1:egpFont(29,"Lucida Console",20)
+EGP1:egpColor(29,vec(255))
+
+EGP1:egpRoundedBoxOutline(30,vec2(8*8,5*70),vec2(85,55))
+EGP1:egpColor(30,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(31,vec2(8*20,5*70),vec2(85,55))
+EGP1:egpColor(31,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(32,vec2(8*32,5*70),vec2(85,55))
+EGP1:egpColor(32,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(33,vec2(8*44,5*70),vec2(85,55))
+EGP1:egpColor(33,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(34,vec2(8*56,5*70),vec2(88,55))
+EGP1:egpColor(34,MainTextColor)
+
+EGP1:egpText(35," 6",vec2(8*6,5*70))
+EGP1:egpAlign(35,0,1)
+EGP1:egpFont(35,"Lucida Console",20)
+EGP1:egpColor(35,vec(255))
+
+EGP1:egpText(36," 7",vec2(8*18,5*70))
+EGP1:egpAlign(36,0,1)
+EGP1:egpFont(36,"Lucida Console",20)
+EGP1:egpColor(36,vec(255))
+
+EGP1:egpText(37," 8",vec2(8*30,5*70))
+EGP1:egpAlign(37,0,1)
+EGP1:egpFont(37,"Lucida Console",20)
+EGP1:egpColor(37,vec(255))
+
+EGP1:egpText(38," 9",vec2(8*42,5*70))
+EGP1:egpAlign(38,0,1)
+EGP1:egpFont(38,"Lucida Console",20)
+EGP1:egpColor(38,vec(255))
+
+EGP1:egpText(39," 0",vec2(8*54,5*70))
+EGP1:egpAlign(39,0,1)
+EGP1:egpFont(39,"Lucida Console",20)
+EGP1:egpColor(39,vec(255))
+ 
+
+#---- Bottom Keys
+
+EGP1:egpRoundedBoxOutline(40,vec2(8*8,5*95),vec2(85,55))
+EGP1:egpColor(40,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(41,vec2(8*20,5*95),vec2(85,55))
+EGP1:egpColor(41,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(42,vec2(8*32,5*95),vec2(85,55))
+EGP1:egpColor(42,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(43,vec2(8*44,5*95),vec2(85,55))
+EGP1:egpColor(43,MainTextColor)
+
+EGP1:egpRoundedBoxOutline(44,vec2(8*56,5*95),vec2(88,55))
+EGP1:egpColor(44,MainTextColor)
+
+EGP1:egpText(45,"SHIFT",vec2(8*4,5*95))
+EGP1:egpAlign(45,0,1)
+EGP1:egpFont(45,"Lucida Console",20)
+EGP1:egpColor(45,vec(255))
+
+EGP1:egpText(46,"CLEAR",vec2(8*16,5*95))
+EGP1:egpAlign(46,0,1)
+EGP1:egpFont(46,"Lucida Console",20)
+EGP1:egpColor(46,vec(255))
+
+EGP1:egpText(47,"SPACE",vec2(8*28,5*95))
+EGP1:egpAlign(47,0,1)
+EGP1:egpFont(47,"Lucida Console",20)
+EGP1:egpColor(47,vec(255))
+
+EGP1:egpText(48,"DIM",vec2(8*41.5,5*95))
+EGP1:egpAlign(48,0,1)
+EGP1:egpFont(48,"Lucida Console",20)
+EGP1:egpColor(48,vec(255))
+
+EGP1:egpText(49,"ENTER",vec2(8*52,5*95))
+EGP1:egpAlign(49,0,1)
+EGP1:egpFont(49,"Lucida Console",20)
+EGP1:egpColor(49,vec(255))
+ 
+
+#---- Keypad Touch Buttons (invis)
+
+EGP1:egpRoundedBox(50,vec2(8*56,5*70),vec2(85,55))
+EGP1:egpColor(50,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(51,vec2(8*8,5*55),vec2(88,55))
+EGP1:egpColor(51,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(52,vec2(8*20,5*55),vec2(85,55))
+EGP1:egpColor(52,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(53,vec2(8*32,5*55),vec2(85,55))
+EGP1:egpColor(53,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(54,vec2(8*44,5*55),vec2(85,55))
+EGP1:egpColor(54,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(55,vec2(8*56,5*55),vec2(88,55))
+EGP1:egpColor(55,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(56,vec2(8*8,5*70),vec2(85,55))
+EGP1:egpColor(56,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(57,vec2(8*20,5*70),vec2(85,55))
+EGP1:egpColor(57,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(58,vec2(8*32,5*70),vec2(85,55))
+EGP1:egpColor(58,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(59,vec2(8*44,5*70),vec2(85,55))
+EGP1:egpColor(59,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(60,vec2(8*8,5*95),vec2(85,55))
+EGP1:egpColor(60,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(61,vec2(8*20,5*95),vec2(85,55))
+EGP1:egpColor(61,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(62,vec2(8*32,5*95),vec2(85,55))
+EGP1:egpColor(62,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(63,vec2(8*44,5*95),vec2(85,55))
+EGP1:egpColor(63,vec4(0,0,0,0))
+
+EGP1:egpRoundedBox(64,vec2(8*56,5*95),vec2(88,55))
+EGP1:egpColor(64,vec4(0,0,0,0))
+
+}
+
+#---- EGP Update Func
+
+function void wirelink:updatePage(){
+    
+#---- RLC Info
+
+RLCPTW = RLCPT:wirelink()
+
+Primed = RLCPTW["Primed1",number]
+On1 = RLCPTW["On1",number]
+MU_Master = RLCPTW["MU_Master",number]
+EngineRPM  = RLCPTW["EngineSpeed1",number]
+Prime = RLCPTW["Prime",number] 
+LoadGround = RLCPTW["MotorDeath",number] 
+DynGround = RLCPTW["DynamicsDeath",number] 
+
+#---- Bright Star Array Madness
+
+BrakeNotch = RLCPTW["BrakeNotch",number]
+Notch = RLCPTW["Notch",number]
+MU_Connected = RLCPTW["MU_Connected",number]
+Horsepower = RLCPTW["Horsepower",number]
+Load = RLCPTW["Load",number]
+DynaNotch = RLCPTW["DynaNotch",number]
+MPH = RLCPTW["MPH",number]
+EmRes = RLCPTW["EmRes",number]
+MainRes = RLCPTW["MainRes",number]
+    
+#---- Init
+if(On1){
+BatteryCharge = round(random(MinChargeAmps,MaxChargeAmps))
+}else{
+BatteryCharge = -3
+}
+
+#Page Index
+#0 = Home
+#1 = Key Punch-in Display,
+#2 = Parameters
+#3 = Error Display
+#4 = Error Display Reset 
+
+if(Page==0){ 
+if(!On1 & Prime_Q==0 & !Start1){ #Engine Not running, Not Primed
+EGP1:egpSetText(1,"Engine Not Running")
+EGP1:egpSetText(2,"Set  ShoMore                    -etc-") 
+}
+
+if(!On1 & Prime_Q==2){ #Engine Not running, Not Primed / Priming
+EGP1:egpSetText(1,"No Battery Charge")
+EGP1:egpSetText(2,"Set  ShoMore                    -etc-") 
+}
+
+if(On1){ #Engine running, Primed
+EGP1:egpSetText(1,"READY I=  "+BatteryCharge:toString()+"A V= 74V Tw= "+WaterTemp:toString()+"C To= "+EngineOilTemp:toString()+"C")
+EGP1:egpSetText(2,"Set  ShoMore                    -etc-") 
+}
+
+
+}
+elseif(Page==1){   
+EGP1:egpSetText(1,KeyPassLocal)
+EGP1:egpSetText(2,"                                 Exit")       
+}
+elseif(Page==2){
+}   
+elseif(Page==3){
+EGP1:egpSetText(1,ErrorDisp)
+EGP1:egpSetText(2,ErrorDisp2) 
+} 
+elseif(Page==4){
+EGP1:egpSetText(1,ErrorDisp)
+EGP1:egpSetText(2,"                        Reset?") 
+} 
+
+
+ 
+} # end of func
+
+User = EGP1["User",entity]
+Cursor = EGP1:egpCursor(User)
+Use = User:keyUse()
+
+#---- EGP Buttons!
+
+if(!Lock){
+Locked = 0
+if(changed(Use)){ #yes I know I am lazy, this is just how I did it lmao... very stupid of me lol
+    #Keypad Upper
+    if(EGP1:button(Cursor,10)){ # F1
+        F1 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    }  
+    else{
+        F1 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,11)){ # F2
+        F2 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    }  
+    else{
+        F2 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,12)){ # F3
+        F3 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        F3 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,13)){ # F4
+        F4 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        F4 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,14)){ # F5
+        F5 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        F5 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    
+    #Keypad Lower
+    if(EGP1:button(Cursor,51)){ # 1
+        Key1 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Key1 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,52)){ # 2
+        Key2 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Key2 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,53)){ # 3
+        Key3 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Key3 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,54)){ # 4
+        Key4 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Key4 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,55)){ # 5
+        Key5 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Key5 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,56)){ # 6
+        Key6 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Key6 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,57)){ # 7
+        Key7 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Key7 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,58)){ # 8
+        Key8 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Key8 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,59)){ # 9
+        Key9 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Key9 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,50)){ # 0
+        Key0 = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Key0 = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,60)){ # Shift
+        Shift = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Shift = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,61)){ # Clear
+        Clear = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Clear = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,62)){ # Space
+        Space = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Space = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,63)){ # Dim
+        Dim = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Dim = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }
+    if(EGP1:button(Cursor,64)){ # Enter
+        Enter = 1
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonin01.wav")
+    } 
+    else{
+        Enter = 0
+        soundPlay(1,0,"titus's locomotive sound expansion pack/resources/ac4400cw/cab/switchesbuttons/radiobutton/s_ac4400cwradiobuttonout01.wav")
+    }  
+}
+}
+else{ # happy thats over now
+Locked = 1
+}
+
+
+if(!->BRIGHTSTAR_CONNECTION){ # OH GOD WHAT THE HEL-
+Mode_Command = "Normal"
+Trainline_Throttle_Pos = BrakeNotch
+Eng_Notch_Command = Notch
+Diesel_Eng_Speed = EngineRPM
+Pwr_Notch_Command = MU_Connected
+Gross_Horsepower = Horsepower
+Input_For_Traction = 1
+Auxiliary_Load = 0
+Main_Gen_Voltage =  600
+Main_Gen_Current = Load
+Main_Gen_Field_Current = Load
+EXC_Field_Percent_On = 0
+EXC_Field_Current = 0
+Battery_Charger_Current = BatteryCharge
+Aux_Gen_Output_PO_Volt = 74
+Aux_Gen_Field_Current = BatteryCharge
+Brk_Cont_XB_Percent = DynaNotch
+DYN_BRK_TM_Field_Current = Load
+DYN_BRK_TM_Arm_Current = Load
+Load_Control_POT = 1
+Horsepower_Deration = 0
+EGR_Deration = 0
+Hot_TM_Deration = 0
+Hot_Oil_Deration = 0
+Hot_Water_Deration = 0
+Dirty_Air_FLTR_Deration = 0
+Turbo_Deration = 0
+Cold_Engine = 0
+Locomotive_Speed = MPH
+Load_CONTR_POT_Volts = 600
+Load_CONTR_TL24_Volts = 600
+PC_Trainline_Volts = EmRes
+Local_PO_Volts = 74
+Main_Resv_Pressure = MainRes
+Manifold_Air_Pressure = 0
+Barometric_Pressure = 0
+Crankshaft_Pressure = 0
+Outside_Air_Temp = ColdTemp+6
+Eng_Water_Temp = WaterTemp
+Eng_Oil_Temp = EngineOilTemp
+Restrictions = "None"
+Traction_MTR_Cutout = 0
+Mode_Bytes = 24
+D7uP_Software_Version = LocalVersion
+}
+else{  
+BRIGHTSTAR_CONNECTION = array(
+Mode_Command,
+Trainline_Throttle_Pos,
+Eng_Notch_Command,
+Diesel_Eng_Speed,
+Pwr_Notch_Command,
+Gross_Horsepower,
+Input_For_Traction,
+Auxiliary_Load,
+Main_Gen_Voltage,
+Main_Gen_Current,
+Main_Gen_Field_Current,
+EXC_Field_Percent_On,
+EXC_Field_Current,
+Battery_Charger_Current,
+Aux_Gen_Output_PO_Volt,
+Aux_Gen_Field_Current,
+Brk_Cont_XB_Percent,
+DYN_BRK_TM_Field_Current,
+DYN_BRK_TM_Arm_Current,
+Load_Control_POT,
+Horsepower_Deration,
+EGR_Deration,
+Hot_TM_Deration,
+Hot_Oil_Deration,
+Hot_Water_Deration,
+Dirty_Air_FLTR_Deration,
+Turbo_Deration,
+Cold_Engine,
+Locomotive_Speed,
+Load_CONTR_POT_Volts,
+Load_CONTR_TL24_Volts,
+PC_Trainline_Volts,
+Local_PO_Volts,
+Main_Resv_Pressure,
+Manifold_Air_Pressure,
+Barometric_Pressure,
+Crankshaft_Pressure,
+Outside_Air_Temp,
+Eng_Water_Temp,
+Eng_Oil_Temp,
+Restrictions,
+Traction_MTR_Cutout,
+Mode_Bytes,
+D7uP_Software_Version
+)
+}
+
+BRIGHTSTAR_DATA_PORT = array(
+LocalVersion,
+F1,
+F2,F3,F4,F5,
+Key0,Key1,Key2,Key3,Key4,Key5,Key6,Key7,Key8,Key9,
+Shift,Clear,Space,Dim,Enter,KeyPassLocal,
+BatteryCharge,Eng_Oil_Temp,Eng_Water_Temp,
+AlarmBell,Silenced
+)
+
+#---- BrightStar Engine Func (For PT2)
+
+if(StartUpMode == 0){ # override thing start
+
+if(changed(FuelPumpReset | FuelPrime)&FuelPumpReset | FuelPrime){
+    Prime_Q +=1
+}
+if(Prime_Q>1){
+    Prime1 = 1
+    timer("PrimeClk1",16000)
+}
+if(clk("PrimeClk1")){
+    Start_Unlock = 1
+}
+
+if(Start_Unlock & !EC_Q){
+    if(EngineStart){
+      Start1 = 1
+      Prime1 = 0
+      Prime_Q = 0
+    stoptimer("PrimeClk1")
+    }
+    else{
+      Start1 = 0
+    }
+}
+elseif(!Primed){
+    Start_Unlock = 0
+}
+
+if(EngineStop){
+    Shutdown1 = 1
+    Prime1 = 0
+    Prime_Q = 0
+    Start_Unlock = 0
+    stoptimer("PrimeClk1")
+}
+else{
+    Shutdown1 = 0
+}
+
+
+#---- EC Switch bullshitery
+
+if(changed(ECSwitch)&ECSwitch){
+    EC_Q +=1
+}
+if(EC_Q>1){
+    Isolation1 = 1
+}
+elseif(EC_Q==0){
+    Isolation1 = 0
+}
+
+if(EC_Q>2){
+    EC_Q = 0
+}
+
+}
+elseif(StartUpMode == 1){ # Normal EMD / GE Manual Start 
+
+
+Isolation1 = ECSwitch    
+Prime1 = FuelPrime
+Start1 = EngineStart
+
+if(EngineStop){
+    Shutdown1 = 1
+    Prime1 = 0
+    Prime_Q = 0
+    Start_Unlock = 0
+}
+else{
+    Shutdown1 = 0
+}
+
+}
+elseif(StartUpMode == 2){ # GE / EMD Autostart
+
+Isolation1 = ECSwitch    
+Start1 = EngineStart
+
+if(EngineStop){
+    Shutdown1 = 1
+    Prime1 = 0
+    Prime_Q = 0
+    Start_Unlock = 0
+}
+else{
+    Shutdown1 = 0
+}
+
+}
+
+EngTemp_C = EngTemp_C + ( On1 - EngTemp_C ) /  max( 1000, 0 ) 
+EngWaterTemp_C = EngWaterTemp_C + ( On1 - EngWaterTemp_C ) /  max( 1000, 0 )  # engine stuffs lolz
+
+EngineOilTemp = round(ColdTemp + ( (IdleTemp-ColdTemp)*EngTemp_C) )
+WaterTemp = round(ColdWaterTemp + ( (IdleWaterTemp-ColdWaterTemp)*EngWaterTemp_C) )
+
+
+
+#---- Key Input ~ Output thing
+
+for(I=50,59){
+    if(EGP1:button(Cursor,I)){ 
+        #print("Key "+(I-50):toString()+" Pressed")
+        local KeyPressed = (I-50)
+        KeyPassLocal = KeyPassLocal + KeyPressed:toString()
+    }
+}
+
+
+
+#---- BrightStar Common Monitor Parameters
+
+if(Key1 | Key2 | Key3 | Key4 | Key5 | Key6 | Key7 | Key8 | Key9 | Key0){
+    Page = 1 
+}
+
+if(Enter & Page == 1){
+    if(KeyPassLocal!=""){
+        
+        Page = 2
+        EGP1:egpSetText(2,"                                 Exit")   
+
+        if(KeyPassLocal == "6001"){
+        EGP1:egpSetText(1,"Engine Not Running")    
+        }
+        if(KeyPassLocal == "6002"){
+        EGP1:egpSetText(1,"Trainline Throttle Pos =  "+Trainline_Throttle_Pos:toString())  
+        }
+        if(KeyPassLocal == "6003"){
+        EGP1:egpSetText(1,"Eng Notch Command =  "+Eng_Notch_Command:toString())
+        }
+        if(KeyPassLocal == "6004"){
+        EGP1:egpSetText(1,"Diesel Eng Speed =  "+Diesel_Eng_Speed:toString())  
+        }
+        if(KeyPassLocal == "6005"){
+        EGP1:egpSetText(1,"PWR Notch Command =  "+Pwr_Notch_Command:toString())
+        }
+        if(KeyPassLocal == "6006"){
+        EGP1:egpSetText(1,"Gross Horsepower =  "+Gross_Horsepower:toString())
+        }
+        if(KeyPassLocal == "6008"){
+        EGP1:egpSetText(1,"Input for Traction =  "+Input_For_Traction:toString())
+        }
+        if(KeyPassLocal == "6010"){
+        EGP1:egpSetText(1,"Auxiliary Load =  "+Auxiliary_Load:toString())  
+        }
+        if(KeyPassLocal == "6011"){
+        EGP1:egpSetText(1,"Main Gen Voltage =  "+Main_Gen_Voltage:toString())  
+        }
+        if(KeyPassLocal == "6013"){
+        EGP1:egpSetText(1,"Main Gen Current =  "+Main_Gen_Current:toString())   
+        }
+        if(KeyPassLocal == "6015"){
+        EGP1:egpSetText(1,"Main Gen Field Current =  "+Main_Gen_Field_Current:toString())
+        }
+        if(KeyPassLocal == "6021"){
+        EGP1:egpSetText(1,"EXC Field Percent On =  "+EXC_Field_Percent_On:toString())
+        }
+        if(KeyPassLocal == "6022"){
+        EGP1:egpSetText(1,"EXC Field Current =  "+EXC_Field_Current:toString())
+        }
+        if(KeyPassLocal == "6051"){
+        EGP1:egpSetText(1,"Battery Charger Current =  "+Battery_Charger_Current:toString())   
+        }
+        if(KeyPassLocal == "6053"){
+        EGP1:egpSetText(1,"AUX Gen Output PO Volt =  "+Aux_Gen_Output_PO_Volt:toString()) 
+        }
+        if(KeyPassLocal == "6056"){
+        EGP1:egpSetText(1,"AUX Gen Field Current =  "+Aux_Gen_Field_Current:toString())
+        }
+        if(KeyPassLocal == "6061"){
+        EGP1:egpSetText(1,"BRK CONT (XB) Percent =  "+Brk_Cont_XB_Percent:toString()) 
+        }
+        if(KeyPassLocal == "6063"){
+        EGP1:egpSetText(1,"DYN BRK TM Field Current =  "+DYN_BRK_TM_Field_Current:toString())
+        }
+        if(KeyPassLocal == "6066"){
+        EGP1:egpSetText(1,"DYN BRK TM Arm Current =  "+DYN_BRK_TM_Arm_Current:toString())
+        }
+        if(KeyPassLocal == "6070"){
+        EGP1:egpSetText(1,"Load Control POT =  "+Load_Control_POT:toString())   
+        }
+        if(KeyPassLocal == "6071"){
+        EGP1:egpSetText(1,"Horsepower Deration =  "+Horsepower_Deration:toString()) 
+        }
+        if(KeyPassLocal == "6072"){
+        EGP1:egpSetText(1,"EGR Deration =  "+EGR_Deration:toString()) 
+        }
+        if(KeyPassLocal == "6073"){
+        EGP1:egpSetText(1,"Hot TM Deration =  "+Hot_TM_Deration:toString())    
+        }
+        if(KeyPassLocal == "6075"){
+        EGP1:egpSetText(1,"Hot Oil Deration =  "+Hot_Oil_Deration:toString())
+        }
+        if(KeyPassLocal == "6076"){
+        EGP1:egpSetText(1,"Hot Water Deration =  "+Hot_Water_Deration:toString())   
+        }
+        if(KeyPassLocal == "6077"){
+        EGP1:egpSetText(1,"Dirty Air FLTR Deration =  "+Dirty_Air_FLTR_Deration:toString())   
+        }
+        if(KeyPassLocal == "6078"){
+        EGP1:egpSetText(1,"Turbo Deration =  "+Turbo_Deration:toString())  
+        }
+        if(KeyPassLocal == "6179"){
+        EGP1:egpSetText(1,"Cold Engine? =  "+Cold_Engine:toString())    
+        }
+        if(KeyPassLocal == "6151"){
+        EGP1:egpSetText(1,"Locomotive Speed =  "+Locomotive_Speed:toString())  
+        }
+        if(KeyPassLocal == "6314"){
+        EGP1:egpSetText(1,"Load CONTR POT Volts =  "+Load_CONTR_POT_Volts:toString())
+        }
+        if(KeyPassLocal == "6315"){
+        EGP1:egpSetText(1,"Load CONTR (T:24) Volts =  "+Load_CONTR_TL24_Volts:toString())
+        }
+        if(KeyPassLocal == "6317"){
+        EGP1:egpSetText(1,"PC Trainline Volts =  "+PC_Trainline_Volts:toString()) 
+        }
+        if(KeyPassLocal == "6319"){
+        EGP1:egpSetText(1,"Local PO Volts =  "+Local_PO_Volts:toString())  
+        }
+        if(KeyPassLocal == "6325"){
+        EGP1:egpSetText(1,"Main RESV Pressure =  "+Main_Resv_Pressure:toString())   
+        }
+        if(KeyPassLocal == "6327"){
+        EGP1:egpSetText(1,"Manifold Air Pressure =  "+Manifold_Air_Pressure:toString())
+        }
+        if(KeyPassLocal == "6329"){
+        EGP1:egpSetText(1,"Barometric Pressure =  "+Barometric_Pressure:toString())
+        }
+        if(KeyPassLocal == "6333"){
+        EGP1:egpSetText(1,"Crankshaft Pressure =  "+Crankshaft_Pressure:toString())   
+        }
+        if(KeyPassLocal == "6337"){
+        EGP1:egpSetText(1,"Outside Air Temp =  "+Outside_Air_Temp:toString())   
+        }
+        if(KeyPassLocal == "6339"){
+        EGP1:egpSetText(1,"Eng Water Temp =  "+Eng_Water_Temp:toString()) 
+        }
+        if(KeyPassLocal == "6343"){
+        EGP1:egpSetText(1,"Eng Oil Temp =  "+Eng_Oil_Temp:toString()) 
+        }
+        if(KeyPassLocal == "6501"){
+        EGP1:egpSetText(1,"Restrictions =  "+Restrictions)    
+        }
+        if(KeyPassLocal == "6502"){
+        EGP1:egpSetText(1,"Traction MTR Cutout =  "+Traction_MTR_Cutout:toString())  
+        }
+        if(KeyPassLocal == "6550"){
+        EGP1:egpSetText(1,"Mode Bytes =  "+Mode_Bytes:toString())    
+        }   
+        if(KeyPassLocal == "7131"){
+        EGP1:egpSetText(1,"D7uP Software Version =  "+D7uP_Software_Version)   
+        }   
+    }
+    else{
+    EGP1:egpSetText(1,"Err")       
+    }
+}
+
+
+#---- Clearing and Exiting Menus
+
+if(Clear | Enter){
+    KeyPassLocal = ""
+}
+if(F5 & Page == 1){
+    Page = 0
+    KeyPassLocal = ""
+}
+
+if(F5 & Page == 2){
+    Page = 0
+    KeyPassLocal = ""
+}
+
+
+
+#---- Error Display
+
+if(changed(LoadGround | DynGround)&LoadGround | DynGround){
+Page = 3
+Silenced = 0
+AlarmBell = 1
+ErrorDisp = "E045 Won't Load: Power Circuit Ground"
+ErrorDisp2 = "                Silence"
+}
+
+if(F3){
+AlarmBell = 0  
+Silenced = 1
+Page = 4 
+}
+
+if(Page == 4 & F4){   
+Page = 0
+}
+
+#---- Alarm Bell
+
+if(changed(AlarmBell)&AlarmBell){
+soundPlay(3,0,"gsgtrainsounds/misc/alarmbell_loop.wav")   
+}
+elseif(changed(Silenced)&Silenced){
+soundStop(3,0.3) 
+}
+
+
+#---- Booting Stuff
+
+if(changed(Power)&Power){
+    EGP1:egpClear()
+    timer("boot",1000)
+    EGP1:updateButtons()
+    #EGP1:updateSoftKey()
+    BootN = 1
+}
+elseif(changed(!Power)&!Power){
+    BootN = 0
+    stoptimer("clk")
+    stoptimer("clk2")
+    EGP1:egpClear()
+}
+
+if(clk("boot")){
+    if(!QuickBoot){
+    local Spin = 1000
+    switch(BootN){
+        case 1,
+            EGP1:egpText(1,"Monitor is ready",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 1.1,
+            EGP1:egpText(1,"Monitor is ready_",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 1.2,
+            EGP1:egpText(1,"Monitor is ready",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 1.3,
+            EGP1:egpText(1,"Monitor is ready_",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 1.4,
+            EGP1:egpText(1,"Monitor is ready",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 1.5,
+            EGP1:egpText(1,"Monitor is ready_",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 1.6,
+            EGP1:egpText(1,"Monitor is ready",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 1.7,
+            EGP1:egpText(1,"Monitor is ready_",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 1.8,
+            EGP1:egpText(1,"Monitor is ready",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 1.9,
+            EGP1:egpText(1,"Monitor is ready_",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 2,
+            EGP1:egpText(1,"Monitor is ready",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 2.1,
+            EGP1:egpText(1,"Monitor is ready_",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 2.2,
+            EGP1:egpText(1,"Monitor is ready",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",Spin)
+            break
+        case 2.3,
+            EGP1:egpText(1,"Software Integrity check in process",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            
+            EGP1:egpText(2,"  "+LocalVersion+" PR CSC OS Ver May 24 17:46:21",vec2(8,3*24))
+            EGP1:egpAlign(2,0,1)
+            EGP1:egpFont(2,"Lucida Console",20)
+            EGP1:egpColor(2,MainTextColor)
+            BootN+=0.1
+            timer("boot",30000)
+            break
+        case 2.4,
+            EGP1:egpText(1,"3.14ac ER AppVer Nov 08 22:01:51",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            
+            EGP1:egpText(2,"  "+LocalVersion+" PR CSC OS Ver May 24 17:46:21",vec2(8,3*24))
+            EGP1:egpAlign(2,0,1)
+            EGP1:egpFont(2,"Lucida Console",20)
+            EGP1:egpColor(2,MainTextColor)
+            BootN+=0.1
+            timer("boot",15000)
+            break
+        case 2.5,
+            EGP1:egpText(1,"WAIT for Control Execution",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            
+            EGP1:egpText(2,"",vec2(8,3*24))
+            EGP1:egpAlign(2,0,1)
+            EGP1:egpFont(2,"Lucida Console",20)
+            EGP1:egpColor(2,MainTextColor)
+            BootN+=0.1
+            timer("boot",16000)
+            break
+        case 2.6,
+            EGP1:egpText(1,"WAIT for Control Execution",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            
+            EGP1:egpText(2,"Set                             -etc-",vec2(8,3*24))
+            EGP1:egpAlign(2,0,1)
+            EGP1:egpFont(2,"Lucida Console",20)
+            EGP1:egpColor(2,MainTextColor)
+            BootN+=0.1
+            timer("boot",8000)
+            break
+        case 2.7,
+            EGP1:egpText(1,"READY I=  -3A V= 66V Tw= 17C To= 15C",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            
+            EGP1:egpText(2,"Set                             -etc-",vec2(8,3*24))
+            EGP1:egpAlign(2,0,1)
+            EGP1:egpFont(2,"Lucida Console",20)
+            EGP1:egpColor(2,MainTextColor)
+            BootN+=0.1
+            timer("boot",2000)
+            timer("splash0",1000)
+            break
+}
+}
+elseif(QuickBoot){
+    switch(BootN){
+        case 1,
+            EGP1:egpText(1,"QUICK BOOT MODE ENABLED!",vec2(8,1*24))
+            EGP1:egpAlign(1,0,1)
+            EGP1:egpFont(1,"Lucida Console",20)
+            EGP1:egpColor(1,MainTextColor)
+            BootN+=0.1
+            timer("boot",100)
+            break
+        case 1.1,
+            EGP1:egpText(2,"QUICK BOOT MODE ENABLED!",vec2(8,3*24))
+            EGP1:egpAlign(2,0,1)
+            EGP1:egpFont(2,"Lucida Console",20)
+            EGP1:egpColor(2,MainTextColor)
+            BootN+=0.1
+            timer("boot",100)
+            timer("splash0",1000)
+            break
+        }
+}
+}
+
+if(clk("splash0")){    
+timer("clk",1000)
+#timer("clk2",200)
+EGP1:updateButtons()
+stoptimer("boot")
+stoptimer("splash0")
+}
+
+interval(150)
+
+# Update yo stuff 
+
+if(clk("clk")){
+    EGP1:updatePage()
+    timer("clk",1000)
+}
+#[
+if(clk("clk2")){
+    EGP1:updateSoftKey()
+    timer("clk2",200)
+}
+
+# why are you looking down here? get out.
