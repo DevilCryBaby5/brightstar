@@ -1,0 +1,4 @@
+comstart
+communication = serial-rs232
+bus = em1_f
+port = 0
