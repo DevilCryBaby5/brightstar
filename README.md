@@ -5,6 +5,7 @@
  * [Common Monitor Parameters](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#common-monitor-parameters)
  * [Display Use](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#display-use)
  * [Installation](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#installation)
+ * [Wiring](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#wiring)
 
 ## BrightStar™ Control System & Associated Component Description
 The BrightStar™ Microprocessor wheelslip control system controls many of the functions of the Locomotive. It's key function is to control the amount of wheelslip and enable maximum tractive effort to be applied. With the introduction of this microprocessor based system, a 25% increase in tractive effort was achieved over the older "E & CHEC" control systems.
@@ -149,7 +150,13 @@ Reset - Automatic if throttle is returned to the idle position (Limited to 3 wit
 
 # Common Monitor Parameters
 
-Input codes for the Display: (Cheat Sheet)
+Using the Soft Keys on the display, you may type in one of these codes to view the Following Function.
+1. Type in Code using your Use Key *(Default is **E**)*, using the Soft Keys on the display.
+2. Once you have entered your desired code, Press the Enter Soft Key.
+
+To cancel, exit, or clear the menu;
+1. Press the Clear Soft Key to clear the code you have put in, used for mistakes.
+2. To exit or cancel, Press the Exit Soft Key (F5)
 
 Code | Function
 -|-
@@ -256,7 +263,68 @@ Grovesteetgman Train Sounds
  * https://steamcommunity.com/sharedfiles/filedetails/?id=1254010890
  * https://steamcommunity.com/sharedfiles/filedetails/?id=1254014222
 
-If you're currently in-game in Garry's Mod, open the E2 Editor, and click the "Update" button under the list of E2s on the lefthand side of the window.
+If you're currently in-game in Garry's Mod, open the E2 Editor, and click the "Update" button under the list of E2s on the left hand side of the window.
+
+
+# Wiring
+
+Wiring the BrightStar™ Engine Management & Control System is fairly straightforward. Begin with;
+1. Spawning in the BrightStar™ Expression 2.
+2. Open the E2, inside the E2 Editor, scroll down to the `#---- E2 Init`, Configure the BrightStar™ settings to your liking.
+
+
+2a. MinChargeAmps = Minimum Battery Charging Amps (While Running)
+
+2b. MaxChargeAmps = Maximum Battery Charging Amps (While Running)
+
+2c. EC_Q = What position the  EC / Isolation Switch is in upon startup (Only applies for KiwiRail Standard Configs)
+
+2d. IdleTemp = Normal Engine Idle Temperature (in Celsius)
+
+2e. ColdTemp = Normal Cold Engine Temperature (in Celsius)
+
+2f. IdleWaterTemp = Normal Engine Idle Water Temperature (in Celsius) 
+
+2g. ColdWaterTemp = Normal Cold Engine Water Temperature (in Celsius)
+
+2h. StartUpMode = BrightStar™ Starting Mode, `0` for NZ Locos, `1` for Manual Primers (Older Engines), `2` for Autostart Engines (Newer)
+
+2i. Locked = Weather the Soft Key input is locked upon startup - **Also can be controlled by a Button Input, `Lock`**
+
+
+3. Spawning an EGP3 screen from Magnums Pack, *Use console command:* `wire_egp_model models/magtrainslocos/functiondisplay_screen.mdl` *to set the EGPs model to the proper model.*
+4. Place the BrightStar™ E2 in a suitable location in the Locomotive Cab.
+5. Wire "EGP1" to the EGP, then refresh the BrightStar™ E2, this will place the EGP screen in the centre of the E2 *(It does this automatically, and is completely normal).*
+6. Wire "RLCPT" to the RLC Pt 2 (Gamma) Chip.
+7. Wire the RLC's "Prime1, Start1, Shutdown1, and Isolation1" Inputs to the corresponding outputs of the BrightStar™ Expression 2.
+8. Wire the other necessary BrightStar™ Inputs as described below...
+
+Below this paragraph is a Table, this table shows what Inputs need to be wired depending on the Starting Mode inside the BrightStar™ Expression 2. As BrightStar™ controls the Locomotives starting circuitry, depending on what starter mode you have in the BrightStar™ E2 determines how the inputs and outputs are treated. Please wire accordingly.
+
+
+Start Mode | Power | ECSwitch | FuelPumpReset | FuelPrime | Engine Start | EngineStop | Lock | Bright Star Connection & Data Port
+-|-|-|-|-|-|-|-|-
+KiwiRail Standard | ✔ | ✔ | ✔ | ❌ | ✔ | ✔ | ⚠ | ⛔
+Manual Start | ✔ | ✔ | ❌ | ✔ | ✔ | ✔ | ⚠ | ⛔
+Autostart | ✔ | ✔ | ❌ | ❌ | ✔ | ✔ | ⚠ | ⛔
+
+-----------------
+
+
+### Icon Legend:
+
+✔: Do Wire
+
+❌: Do Not Wire
+
+⚠: Optional
+
+⛔: Do Not Wire - Debugging - Internal Use Only
+
+
+
+**NOTE:** Your PT2 (Gamma) Config may interfere with the BrightStar™ Start Modes, if so, try using another Starter Mode in your PT2 config to resolve the issue. If the problem continues, unwire BrightStar™ from the Locomotive and use it as a DID display, and isolate it from the starter circuit.
+
 
 
 ## Thank You!
