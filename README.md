@@ -325,6 +325,8 @@ Autostart | ✔ | ✔ | ❌ | ❌ | ✔ | ✔ | ⚠ | ⛔
 
 **NOTE:** Your PT2 (Gamma) Config may interfere with the BrightStar™ Start Modes, if so, try using another Starter Mode in your PT2 config to resolve the issue. If the problem continues, unwire BrightStar™ from the Locomotive and use it as a DID display, and isolate it from the starter circuit.
 
+**NOTE No.2:** By installing BrightStar™, you will need to update the Locomotives PT2 (Gamma) Config file. Add 25% to your factor of adhesion, as BrightStar™ has been proven to give at least a 25% increase in traction effort. *(Since its PT2, just add it to adhesion)*
+
 
 
 ## Thank You!
