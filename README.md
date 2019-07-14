@@ -327,6 +327,8 @@ Autostart | ✔ | ✔ | ❌ | ❌ | ✔ | ✔ | ⚠ | ⛔
 
 **NOTE No.2:** By installing BrightStar™, you will need to update the Locomotives PT2 (Gamma) Config file. Add 25% to your factor of adhesion, as BrightStar™ has been proven to give at least a 25% increase in traction effort. *(Since its PT2, just add it to adhesion)*
 
+**NOTE No.3:** ECSwitch is your Isolation Switch!
+
 
 
 ## Thank You!
