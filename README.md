@@ -1,5 +1,9 @@
 # BrightStar™ Engine Management & Control System
 
+![Build-Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
+![Manifest-Version](https://img.shields.io/github/last-commit/TitusStudiosMediaGroup/brightstar.svg)
+![Repo-Size](https://img.shields.io/github/repo-size/TitusStudiosMediaGroup/brightstar.svg)
+
 ### Table of Contents
  * [BrightStar™ Control System & Associated Component Description](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#brightstar-control-system--associated-component-description)
  * [Common Monitor Parameters](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#common-monitor-parameters)
