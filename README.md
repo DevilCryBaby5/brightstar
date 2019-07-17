@@ -207,6 +207,8 @@ Code | Function
 
 ---
 
+**NOTE:** When using Soft Keys, you MUST Press and HOLD for a second or two for it to register, this is to save lag issues on the server, however you shouldn't need to use the Soft Keys under normal circumstances.
+
 
 # Display Use
 
