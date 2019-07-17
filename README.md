@@ -1,5 +1,7 @@
 # BrightStar™ Engine Management & Control System
 
+[![Build Status](https://travis-ci.org/TitusStudiosMediaGroup/brightstar.svg?branch=master)](https://travis-ci.org/TitusStudiosMediaGroup/brightstar)
+
 ### Table of Contents
  * [BrightStar™ Control System & Associated Component Description](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#brightstar-control-system--associated-component-description)
  * [Common Monitor Parameters](https://github.com/TitusStudiosMediaGroup/brightstar/blob/master/README.md#common-monitor-parameters)
